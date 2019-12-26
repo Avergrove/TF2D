@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 7223196517155183451}
   m_Layer: 9
   m_Name: Soldier
-  m_TagString: Untagged
+  m_TagString: Players
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -146,8 +146,9 @@ MonoBehaviour:
   hp: 200
   currentHp: 200
   equippedWeapon: {fileID: 0}
-  shoulderDistance: 2.5
+  shoulderDistance: 4
   movementSpeedMultiplier: 0.8
+  maxAirControlSpeedMultiplier: 0
   jumpHeightMultiplier: 1
   maxJumpCount: 1
   primaryWeaponPrefab: {fileID: 6479929026498524186, guid: 6cee67e51c718dc4c83ab1d667ca914c,
@@ -156,6 +157,8 @@ MonoBehaviour:
     type: 3}
   meleeWeaponPrefab: {fileID: 6479929026498524186, guid: 6cee67e51c718dc4c83ab1d667ca914c,
     type: 3}
+  groundCheckDistance: 1.5
+  debugCollider: {fileID: 8698379097914695209}
 --- !u!1 &8698379098572800518
 GameObject:
   m_ObjectHideFlags: 0
@@ -166,7 +169,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8698379098572800517}
   - component: {fileID: 8698379098572800516}
-  m_Layer: 9
+  m_Layer: 0
   m_Name: WeaponHolder
   m_TagString: Untagged
   m_Icon: {fileID: 0}

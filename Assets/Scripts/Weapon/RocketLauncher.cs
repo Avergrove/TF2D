@@ -33,8 +33,6 @@ public class RocketLauncher : Weapon
         Rigidbody2D rgbd = generatedProjectile.GetComponent<Rigidbody2D>();
         Vector3 angles = generatedProjectile.transform.rotation.eulerAngles;
         float velocity = generatedProjectile.GetComponent<Rocket>().velocity;
-        Debug.Log(string.Format("{0}, {1}, {2}", angles.x, angles.y, angles.z));
         rgbd.velocity = new Vector2(velocity * Mathf.Cos(angles.z * Mathf.Deg2Rad), velocity * Mathf.Sin(angles.z * Mathf.Deg2Rad));
-        Debug.Log(string.Format("Velocity: {0} {1}", rgbd.velocity.x, rgbd.velocity.y));
     }
 }

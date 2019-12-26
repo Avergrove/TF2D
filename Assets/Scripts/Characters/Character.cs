@@ -3,6 +3,7 @@
 public abstract class Character : MonoBehaviour, IControllable
 {
     Rigidbody2D rgbd;
+    Collider2D colliderComp;
     GameObject weaponHolder;
 
     public int hp;
@@ -15,6 +16,9 @@ public abstract class Character : MonoBehaviour, IControllable
     protected float movementSpeed;
     public float movementSpeedMultiplier;
 
+    protected float maxAirControlSpeed;
+    public float maxAirControlSpeedMultiplier;
+
     protected float jumpHeight;
     public float jumpHeightMultiplier;
     public float maxJumpCount;
@@ -23,17 +27,26 @@ public abstract class Character : MonoBehaviour, IControllable
     public GameObject secondaryWeaponPrefab;
     public GameObject meleeWeaponPrefab;
 
+    public float groundCheckDistance = 1.5f;
+    private bool isGrounded;
+
+    // Debug
+    public Collider2D debugCollider;
+
     // Start is called before the first frame update
     public virtual void Start()
     {
+
+        this.colliderComp = this.GetComponent<Collider2D>();
         this.rgbd = this.GetComponent<Rigidbody2D>();
-        this.rgbd.gravityScale = 8;
+        this.rgbd.gravityScale = 5.5f;
 
         this.weaponHolder = this.transform.Find("WeaponHolder").gameObject;
 
         currentHp = hp;
 
-        this.movementSpeed = 15;
+        this.movementSpeed = 12.5f;
+        this.maxAirControlSpeed = 3f;
         this.jumpHeight = 20;
 
         EquipWeapon(GameObject.Instantiate(primaryWeaponPrefab).GetComponent<Weapon>());
@@ -53,6 +66,12 @@ public abstract class Character : MonoBehaviour, IControllable
 
         weaponHolder.transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
 
+        // Ground check, applys overlapSquare to two ends of the model to check whether character is grounded.
+        Vector2 modelSize = colliderComp.bounds.size;
+
+        // TODO: Replace raycast with overlapArea for ground detection.
+        RaycastHit2D raycastHit = Physics2D.Raycast(transform.position, Vector2.down, modelSize.x / 2 + groundCheckDistance, 1 << 8);
+        isGrounded = raycastHit;
     }
 
     public void OnFirePressed()
@@ -62,12 +81,39 @@ public abstract class Character : MonoBehaviour, IControllable
 
     public virtual void OnJumpPressed()
     {
-        rgbd.velocity = new Vector2(rgbd.velocity.x, jumpHeight * jumpHeightMultiplier);
+        if (isGrounded)
+        {
+            rgbd.velocity = new Vector2(rgbd.velocity.x, jumpHeight * jumpHeightMultiplier);
+        }
     }
 
-    public void OnHorizontalAxis(float value)
+    public void OnHorizontalAxis(float tiltValue)
     {
-        rgbd.velocity = new Vector2(movementSpeed * movementSpeedMultiplier * value, rgbd.velocity.y);
+        if (isGrounded)
+        {
+            rgbd.velocity = new Vector2(movementSpeed * movementSpeedMultiplier * tiltValue, rgbd.velocity.y);
+        }
+
+        // Speed should slowly change, instead of instant change.
+        // If pressing the reverse direction, character should stop.
+        // if horizontalVelocity = 0, accelerate to maxAirControlSpeed slowly.
+        else
+        {
+            if(Mathf.Abs(rgbd.velocity.x) > maxAirControlSpeed)
+            {
+                // Airbrake
+                if(Mathf.Sign(rgbd.velocity.x) != Mathf.Sign(tiltValue))
+                {
+                    rgbd.velocity = new Vector2(maxAirControlSpeed * tiltValue, rgbd.velocity.y);
+                }
+            }
+
+            // Allow wiggle room in the air.
+            else if(rgbd.velocity.x <= maxAirControlSpeed)
+            {
+                rgbd.velocity = new Vector2(maxAirControlSpeed * tiltValue, rgbd.velocity.y);
+            }
+        }
     }
 
     public void OnVerticalAxis(float value)
