@@ -96,11 +96,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bfeec42ede4e0d34bb13af7a8ad65a0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  radius: 10
+  shooter: {fileID: 0}
   velocity: 20
-  directDamage: 105
+  gravityScale: 0
+  contactDamage: 0
   knockback: 1250
-  effectiveExplosiveDistance: 500
+  explosionRadius: 5
   explosionParticles: {fileID: 5703529991527922713, guid: dc2cb28b0bffccd47981c2389e911577,
     type: 3}
 --- !u!50 &5834806782588979333

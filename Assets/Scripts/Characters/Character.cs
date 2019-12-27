@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public abstract class Character : MonoBehaviour, IControllable
 {
@@ -23,9 +24,11 @@ public abstract class Character : MonoBehaviour, IControllable
     public float jumpHeightMultiplier;
     public float maxJumpCount;
 
-    public GameObject primaryWeaponPrefab;
-    public GameObject secondaryWeaponPrefab;
-    public GameObject meleeWeaponPrefab;
+    public GameObject defaultPrimaryWeapon;
+    public GameObject defaultSecondaryWeapon;
+    public GameObject defaultMeleeWeapon;
+
+    private GameObject[] weapons;
 
     public float groundCheckDistance = 1.5f;
     private bool isGrounded;
@@ -45,13 +48,17 @@ public abstract class Character : MonoBehaviour, IControllable
 
         currentHp = hp;
 
-        this.movementSpeed = 12.5f;
+        this.movementSpeed = 13.5f;
         this.maxAirControlSpeed = 3f;
         this.jumpHeight = 20;
 
-        EquipWeapon(GameObject.Instantiate(primaryWeaponPrefab).GetComponent<Weapon>());
-        EquipWeapon(GameObject.Instantiate(secondaryWeaponPrefab).GetComponent<Weapon>());
-        EquipWeapon(GameObject.Instantiate(meleeWeaponPrefab).GetComponent<Weapon>());
+        weapons = new GameObject[3];
+
+        this.GiveWeapon(defaultPrimaryWeapon, 0);
+        this.GiveWeapon(defaultSecondaryWeapon, 1);
+        this.GiveWeapon(defaultMeleeWeapon, 2);
+
+        this.EquipWeapon(0);
     }
 
     // Update is called once per frame
@@ -72,19 +79,6 @@ public abstract class Character : MonoBehaviour, IControllable
         // TODO: Replace raycast with overlapArea for ground detection.
         RaycastHit2D raycastHit = Physics2D.Raycast(transform.position, Vector2.down, modelSize.x / 2 + groundCheckDistance, 1 << 8);
         isGrounded = raycastHit;
-    }
-
-    public void OnFirePressed()
-    {
-        equippedWeapon.fire();
-    }
-
-    public virtual void OnJumpPressed()
-    {
-        if (isGrounded)
-        {
-            rgbd.velocity = new Vector2(rgbd.velocity.x, jumpHeight * jumpHeightMultiplier);
-        }
     }
 
     public void OnHorizontalAxis(float tiltValue)
@@ -126,14 +120,84 @@ public abstract class Character : MonoBehaviour, IControllable
         currentHp -= damage;
     }
 
-    /**
-     * Attaches a weapon to character, and automatically equip the character with it.
-     * The gameObject must implement Weapon
-     */
-    public void EquipWeapon(Weapon weapon)
+    /// <summary>
+    /// Adds a weapon to the player's inventory
+    /// </summary>
+    /// <param name="weaponObject">The weapon to add in</param>
+    /// <param name="slot">Which slot to add it to, starting from 0 for primary weapon.</param>
+    public void GiveWeapon(GameObject weaponObject, int slot)
     {
-        this.equippedWeapon = weapon;
-        this.equippedWeapon.transform.SetParent(weaponHolder.transform);
-        this.equippedWeapon.transform.localPosition = shoulderDistance * new Vector2(1, 0);
+
+        GameObject newObject = GameObject.Instantiate(weaponObject);
+        newObject.transform.SetParent(weaponHolder.transform);
+        newObject.transform.localPosition = shoulderDistance * new Vector2(1, 0);
+        newObject.GetComponent<Weapon>().Owner = this.gameObject;
+        newObject.GetComponent<SpriteRenderer>().enabled = false;
+
+        this.weapons[slot] = newObject;
+
+    }
+
+    /// <summary>
+    /// Equips the character with weapon on slot slot
+    /// </summary>
+    /// <param name="slot">The slot for the weapon to pick from, starting from 0 for primary weapon.</param>
+    public void EquipWeapon(int slot)
+    {
+        this.equippedWeapon = weapons[slot].GetComponent<Weapon>();
+        this.equippedWeapon.GetComponent<SpriteRenderer>().enabled = true;
+    }
+
+    /// <summary>
+    /// Stows a weapon away for later use.
+    /// </summary>
+    public void StowWeapon()
+    {
+        if (this.equippedWeapon != null)
+        {
+            this.equippedWeapon.GetComponent<SpriteRenderer>().enabled = false;
+            this.equippedWeapon = null;
+        }
+    }
+
+    public void OnFirePressed()
+    {
+        equippedWeapon.OnFirePressed();
+    }
+
+    public void OnFireHeld()
+    {
+        equippedWeapon.OnFireHeld();
+    }
+
+    public void OnFireReleased()
+    {
+        equippedWeapon.OnFireReleased();
+    }
+
+    public virtual void OnJumpPressed()
+    {
+        if (isGrounded)
+        {
+            rgbd.velocity = new Vector2(rgbd.velocity.x, jumpHeight * jumpHeightMultiplier);
+        }
+    }
+
+    public void OnSlot1()
+    {
+        this.StowWeapon();
+        this.EquipWeapon(0);
+    }
+
+    public void OnSlot2()
+    {
+        this.StowWeapon();
+        this.EquipWeapon(1);
+    }
+
+    public void OnSlot3()
+    {
+        this.StowWeapon();
+        this.EquipWeapon(2);
     }
 }

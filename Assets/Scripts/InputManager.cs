@@ -28,9 +28,36 @@ public class InputManager : MonoBehaviour
             controllable.OnJumpPressed();
         }
 
+        // Fire handling
         if (Input.GetButtonDown("Fire1"))
         {
             controllable.OnFirePressed();
+        }
+
+        else if (Input.GetButton("Fire1"))
+        {
+            controllable.OnFireHeld();
+        }
+
+        else if (Input.GetButtonUp("Fire1"))
+        {
+            controllable.OnFireReleased();
+        }
+
+        // Weapon slots
+        if (Input.GetButtonDown("Slot1"))
+        {
+            controllable.OnSlot1();
+        }
+
+        if (Input.GetButtonDown("Slot2"))
+        {
+            controllable.OnSlot2();
+        }
+
+        if (Input.GetButtonDown("Slot3"))
+        {
+            controllable.OnSlot3();
         }
 
     }

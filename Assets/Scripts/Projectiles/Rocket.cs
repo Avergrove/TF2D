@@ -6,35 +6,28 @@ using UnityEngine;
  * Defines a basic rocket launched from a rocket launcher.
  * A rocket explodes upon impact with a body, causing explosion damage and knockback.
  */
-public class Rocket : MonoBehaviour
+public class Rocket : Projectile
 {
-    public GameObject shooter;
-    private Rigidbody2D rgbd;
-
-    public float radius;
-    public float velocity;
-    public int directDamage;
+    public int contactDamage;
     public float knockback;
-    public float effectiveExplosiveDistance;
-
+    public float explosionRadius;
     public GameObject explosionParticles;
 
     // Start is called before the first frame update
-    void Start()
+    protected override void Start()
     {
-        // Physics2D.IgnoreCollision(this.GetComponent<Collider2D>(), shooter.GetComponent<Collider2D>());
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        // Explode on collision
-
+        if(shooter != null)
+        {
+            Physics2D.IgnoreCollision(this.GetComponent<Collider2D>(), shooter.GetComponent<Collider2D>());
+        }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        Collider2D[] affectedTargets = Physics2D.OverlapCircleAll(this.transform.position, radius);
+
+        Debug.Log(collision.collider.gameObject.name);
+
+        Collider2D[] affectedTargets = Physics2D.OverlapCircleAll(this.transform.position, explosionRadius);
         if (collision.gameObject.layer == LayerMask.NameToLayer("Platforms"))
         {
             Explode(affectedTargets, collision);

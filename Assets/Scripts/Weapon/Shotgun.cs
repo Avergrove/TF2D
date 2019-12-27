@@ -2,11 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/**
- * A Scattergun: Deals damage proportional to distance of colliding object.
- * 
- */
-public class Scattergun : Weapon
+public class Shotgun : Weapon
 {
     public GameObject tracer;
     public GameObject collisionParticle;
@@ -20,7 +16,7 @@ public class Scattergun : Weapon
     {
         // Fire a hitscan raycast
         Vector2 cursorInWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Vector2 direction = cursorInWorldPos - (Vector2) transform.parent.position;
+        Vector2 direction = cursorInWorldPos - (Vector2)transform.parent.position;
 
         string[] layers = { "Platforms", "Players" };
         LayerMask mask = LayerMask.GetMask(layers);
@@ -31,12 +27,13 @@ public class Scattergun : Weapon
         generatedTracer.transform.localPosition = Vector2.zero;
 
         LineRenderer tracerLineRenderer = generatedTracer.GetComponent<LineRenderer>();
-        Vector3[] linePositions = new Vector3[2] { transform.position, raycastHit.point};
+        Vector3[] linePositions = new Vector3[2] { transform.position, raycastHit.point };
         tracerLineRenderer.SetPositions(linePositions);
 
         // Instantiate particle on coollided position
         GameObject shotParticle = GameObject.Instantiate(collisionParticle);
         shotParticle.transform.position = raycastHit.point;
+        shotParticle.transform.rotation = Quaternion.Euler(raycastHit.normal);
     }
 
     public override void OnFireHeld()

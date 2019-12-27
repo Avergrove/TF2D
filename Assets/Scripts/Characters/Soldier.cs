@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /**
- * Scout:
- *  - Fast
- *  - Can double jump
- *  - Rainbows make him cry
+ * Soldier:
+ *  - Can self blast resistance
+ *  - Leaves a rocket jump trail under his feet
  */
 public class Soldier : Character
 {
