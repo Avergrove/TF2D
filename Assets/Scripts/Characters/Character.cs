@@ -33,9 +33,6 @@ public abstract class Character : MonoBehaviour, IControllable
     public float groundCheckDistance = 1.5f;
     private bool isGrounded;
 
-    // Debug
-    public Collider2D debugCollider;
-
     // Start is called before the first frame update
     public virtual void Start()
     {

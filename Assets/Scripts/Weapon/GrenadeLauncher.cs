@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/**
- * Fires rockets, the weapon of choice of Soldier.
- */
-public class RocketLauncher : ProjectileWeapon
+public class GrenadeLauncher : Weapon
 {
+    public GameObject projectile;
+
     protected override void Start()
     {
         base.Start();
@@ -21,16 +20,13 @@ public class RocketLauncher : ProjectileWeapon
         Vector2 direction = cursorInWorldPos - (Vector2)transform.parent.position;
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
 
-        GameObject generatedProjectile = GameObject.Instantiate(firedProjectile);
+        GameObject generatedProjectile = GameObject.Instantiate(projectile);
         generatedProjectile.GetComponent<Projectile>().shooter = Owner;
 
         // Set transform
         generatedProjectile.transform.position = this.transform.position;
         generatedProjectile.transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
 
-        // Set physics
-        Rigidbody2D rgbd = generatedProjectile.GetComponent<Rigidbody2D>();
-        Vector3 angles = generatedProjectile.transform.rotation.eulerAngles;
     }
 
     public override void OnFireHeld()
