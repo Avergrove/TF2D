@@ -77,8 +77,21 @@ public abstract class Character : MonoBehaviour, IControllable
         Vector2 modelSize = colliderComp.bounds.size;
 
         // TODO: Replace raycast with overlapArea for ground detection.
-        RaycastHit2D raycastHit = Physics2D.Raycast(transform.position, Vector2.down, modelSize.x / 2 + groundCheckDistance, 1 << 8);
-        isGrounded = raycastHit;
+        int layerMask = (1 << LayerMask.NameToLayer("Platforms") | (1 << LayerMask.NameToLayer("Characters")));
+        RaycastHit2D[] raycastHits = Physics2D.RaycastAll(transform.position, Vector2.down, modelSize.x / 2 + groundCheckDistance, layerMask);
+
+        bool hasCollision = false;
+        foreach(RaycastHit2D raycastHit in raycastHits)
+        {
+            if(!raycastHit.collider.gameObject.Equals(this.gameObject))
+            {
+                hasCollision = true;
+                break;
+            }
+        }
+
+        isGrounded = hasCollision;
+
     }
 
     public void OnHorizontalAxis(float tiltValue)

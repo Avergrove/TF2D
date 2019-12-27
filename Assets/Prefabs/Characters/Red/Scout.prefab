@@ -151,11 +151,11 @@ MonoBehaviour:
   maxAirControlSpeedMultiplier: 0
   jumpHeightMultiplier: 1
   maxJumpCount: 2
-  primaryWeaponPrefab: {fileID: 2045617596766503364, guid: a66ea3e1e38fc7249bf0115a437fa800,
+  defaultPrimaryWeapon: {fileID: 2045617596766503364, guid: a66ea3e1e38fc7249bf0115a437fa800,
     type: 3}
-  secondaryWeaponPrefab: {fileID: 2045617596766503364, guid: a66ea3e1e38fc7249bf0115a437fa800,
+  defaultSecondaryWeapon: {fileID: 2625906834087809666, guid: 5b111fa61a8148d47a7059e0abcd20b3,
     type: 3}
-  meleeWeaponPrefab: {fileID: 2045617596766503364, guid: a66ea3e1e38fc7249bf0115a437fa800,
+  defaultMeleeWeapon: {fileID: 2625906834087809666, guid: 5b111fa61a8148d47a7059e0abcd20b3,
     type: 3}
   groundCheckDistance: 1.5
   debugCollider: {fileID: 0}
