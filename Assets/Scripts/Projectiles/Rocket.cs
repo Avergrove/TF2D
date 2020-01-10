@@ -16,6 +16,7 @@ public class Rocket : Projectile
     // Start is called before the first frame update
     protected override void Start()
     {
+        base.Start();
         if(shooter != null)
         {
             Physics2D.IgnoreCollision(this.GetComponent<Collider2D>(), shooter.GetComponent<Collider2D>());
