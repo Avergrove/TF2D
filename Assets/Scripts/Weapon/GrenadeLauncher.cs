@@ -11,13 +11,8 @@ public class GrenadeLauncher : Weapon
         base.Start();
     }
 
-    /**
-     * Fires a rocket in the pointed direction.
-     */
-    public override void OnFirePressed()
+    public override void OnFirePressed(Vector2 direction)
     {
-        Vector2 cursorInWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Vector2 direction = cursorInWorldPos - (Vector2)transform.parent.position;
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
 
         GameObject generatedProjectile = GameObject.Instantiate(projectile);
@@ -26,7 +21,6 @@ public class GrenadeLauncher : Weapon
         // Set transform
         generatedProjectile.transform.position = this.transform.position;
         generatedProjectile.transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
-
     }
 
     public override void OnFireHeld()

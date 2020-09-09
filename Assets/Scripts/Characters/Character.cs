@@ -1,10 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
+using static Direction;
 
-public abstract class Character : MonoBehaviour, IControllable
+/// <summary>
+/// Defines the stats of a character
+/// </summary>
+public abstract class Character : MonoBehaviour
 {
     Rigidbody2D rgbd;
-    Collider2D colliderComp;
     GameObject weaponHolder;
 
     public int hp;
@@ -14,14 +18,16 @@ public abstract class Character : MonoBehaviour, IControllable
 
     public float shoulderDistance;
 
-    protected float movementSpeed;
-    public float movementSpeedMultiplier;
+    private DirectionEnum facingDirection;
+
+    public float acceleration;
+    public float maxMovementSpeed;
 
     protected float maxAirControlSpeed;
     public float maxAirControlSpeedMultiplier;
 
     protected float jumpHeight;
-    public float jumpHeightMultiplier;
+    public float jumpBoost;
     public float maxJumpCount;
 
     public GameObject defaultPrimaryWeapon;
@@ -30,14 +36,10 @@ public abstract class Character : MonoBehaviour, IControllable
 
     private GameObject[] weapons;
 
-    public float groundCheckDistance = 1.5f;
-    private bool isGrounded;
+    public bool isGrounded;
 
-    // Start is called before the first frame update
     public virtual void Start()
     {
-
-        this.colliderComp = this.GetComponent<Collider2D>();
         this.rgbd = this.GetComponent<Rigidbody2D>();
         this.rgbd.gravityScale = 5.5f;
 
@@ -45,9 +47,10 @@ public abstract class Character : MonoBehaviour, IControllable
 
         currentHp = hp;
 
-        this.movementSpeed = 13.5f;
+        this.facingDirection = DirectionEnum.Right;
+
         this.maxAirControlSpeed = 3f;
-        this.jumpHeight = 20;
+        this.jumpHeight = 25;
 
         weapons = new GameObject[3];
 
@@ -61,6 +64,47 @@ public abstract class Character : MonoBehaviour, IControllable
     // Update is called once per frame
     public virtual void Update()
     {
+        isGrounded = GroundCheck();
+    }
+
+    public void Move(Vector2 tiltValue)
+    {
+
+        if (tiltValue.x > 0)
+        {
+            facingDirection = DirectionEnum.Right;
+        }
+
+        else if (tiltValue.x < 0)
+        {
+            facingDirection = DirectionEnum.Left;
+        }
+
+        if (isGrounded)
+        {
+            if (Math.Abs(rgbd.velocity.x) < maxMovementSpeed)
+            {
+                float resultingXVelocity = rgbd.velocity.x + Direction.ConsiderDirection(facingDirection, acceleration) * Math.Abs(tiltValue.x);
+
+                rgbd.velocity = new Vector2(Mathf.Clamp(resultingXVelocity, -maxMovementSpeed, maxMovementSpeed), rgbd.velocity.y);
+            }
+        }
+
+        // TODO: 2D Character strafing, maximum speed is saved until you land on the ground
+        else
+        {
+            // TODO: Fix case when you have higher velocity
+            if (Math.Abs(rgbd.velocity.x) < maxAirControlSpeed)
+            {
+                // TODO: Decrease acceleration as character approaches max speed: Check Lerp
+                rgbd.velocity = new Vector2(rgbd.velocity.x + Direction.ConsiderDirection(facingDirection, acceleration) * Math.Abs(tiltValue.x), rgbd.velocity.y);
+            }
+        }
+    }
+
+
+    public void PointWithMouse()
+    {
         // Point weaponholder towards cursor, if available.
         Vector2 mousePos = Input.mousePosition;
         Vector2 objectPos = Camera.main.WorldToScreenPoint(weaponHolder.transform.position);
@@ -69,55 +113,23 @@ public abstract class Character : MonoBehaviour, IControllable
         float angle = Mathf.Atan2(diff.y, diff.x) * Mathf.Rad2Deg;
 
         weaponHolder.transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
-
-        // Ground check, applys overlapSquare to two ends of the model to check whether character is grounded.
-        Vector2 modelSize = colliderComp.bounds.size;
-
-        // TODO: Replace raycast with overlapArea for ground detection.
-        int layerMask = (1 << LayerMask.NameToLayer("Platforms") | (1 << LayerMask.NameToLayer("Characters")));
-        RaycastHit2D[] raycastHits = Physics2D.RaycastAll(transform.position, Vector2.down, modelSize.x / 2 + groundCheckDistance, layerMask);
-
-        bool hasCollision = false;
-        foreach(RaycastHit2D raycastHit in raycastHits)
-        {
-            if(!raycastHit.collider.gameObject.Equals(this.gameObject))
-            {
-                hasCollision = true;
-                break;
-            }
-        }
-
-        isGrounded = hasCollision;
-
     }
 
-    public void OnHorizontalAxis(float tiltValue)
+    public void PointWithJoystick(Vector2 tilt)
     {
-        if (isGrounded)
+        // TODO: Fix XY axis snapping
+        if (!tilt.Equals(Vector2.zero))
         {
-            rgbd.velocity = new Vector2(movementSpeed * movementSpeedMultiplier * tiltValue, rgbd.velocity.y);
+            float angle = Mathf.Atan2(tilt.y, tilt.x) * Mathf.Rad2Deg;
+            weaponHolder.transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
         }
+    }
 
-        // Speed should slowly change, instead of instant change.
-        // If pressing the reverse direction, character should stop.
-        // if horizontalVelocity = 0, accelerate to maxAirControlSpeed slowly.
-        else
-        {
-            if(Mathf.Abs(rgbd.velocity.x) > maxAirControlSpeed)
-            {
-                // Airbrake
-                if(Mathf.Sign(rgbd.velocity.x) != Mathf.Sign(tiltValue))
-                {
-                    rgbd.velocity = new Vector2(maxAirControlSpeed * tiltValue, rgbd.velocity.y);
-                }
-            }
-
-            // Allow wiggle room in the air.
-            else if(rgbd.velocity.x <= maxAirControlSpeed)
-            {
-                rgbd.velocity = new Vector2(maxAirControlSpeed * tiltValue, rgbd.velocity.y);
-            }
-        }
+    private bool GroundCheck()
+    {
+        int layerMask = (1 << LayerMask.NameToLayer("Platforms"));
+        return Physics2D.OverlapArea(new Vector2(transform.position.x - 0.5f, transform.position.y - 0.5f), new Vector2(transform.position.x + 0.5f, transform.position.y - 1.5f), layerMask);
+ 
     }
 
     public void OnVerticalAxis(float value)
@@ -170,9 +182,9 @@ public abstract class Character : MonoBehaviour, IControllable
         }
     }
 
-    public void OnFirePressed()
+    public void Fire(Vector2 direction)
     {
-        equippedWeapon.OnFirePressed();
+        equippedWeapon.OnFirePressed(direction);
     }
 
     public void OnFireHeld()
@@ -185,11 +197,14 @@ public abstract class Character : MonoBehaviour, IControllable
         equippedWeapon.OnFireReleased();
     }
 
-    public virtual void OnJumpPressed()
+    
+    public virtual void Jump()
     {
+        // TODO: Boost only if analog stick is being pushed.
         if (isGrounded)
         {
-            rgbd.velocity = new Vector2(rgbd.velocity.x, jumpHeight * jumpHeightMultiplier);
+            float boost = Direction.ConsiderDirection(facingDirection, jumpBoost);
+            rgbd.velocity = new Vector2(rgbd.velocity.x + boost, jumpHeight);
         }
     }
 

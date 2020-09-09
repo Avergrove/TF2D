@@ -4,9 +4,13 @@ using UnityEngine;
 
 public interface IControllable
 {
+    void OnMouseMoved();
     void OnHorizontalAxis(float value);
     void OnVerticalAxis(float value);
-    void OnFirePressed();
+    void OnLeftAnalogStick(Vector2 tilt);
+    void OnRightAnalogStick(Vector2 tilt);
+    void OnKeyboardFirePressed(Vector2 mousePosition);
+    void OnJoystickFirePressed(Vector2 joystickDirection);
     void OnFireHeld();
     void OnFireReleased();
     void OnJumpPressed();

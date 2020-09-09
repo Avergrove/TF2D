@@ -18,7 +18,7 @@ public class Flamethrower : Weapon
         emission.enabled = false;
     }
 
-    public override void OnFirePressed()
+    public override void OnFirePressed(Vector2 direction)
     {
 
         // Turns on the flamethrower

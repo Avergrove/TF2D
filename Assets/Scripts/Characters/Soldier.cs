@@ -4,7 +4,8 @@ using UnityEngine;
 
 /**
  * Soldier:
- *  - Can self blast resistance
+ *	- Is equipped with a rocket Launcher
+ *  - Has self blast resistance
  *  - Leaves a rocket jump trail under his feet
  */
 public class Soldier : Character

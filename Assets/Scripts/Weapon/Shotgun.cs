@@ -12,12 +12,8 @@ public class Shotgun : Weapon
         base.Start();
     }
 
-    public override void OnFirePressed()
+    public override void OnFirePressed(Vector2 direction)
     {
-        // Fire a hitscan raycast
-        Vector2 cursorInWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Vector2 direction = cursorInWorldPos - (Vector2)transform.parent.position;
-
         string[] layers = { "Platforms", "Players" };
         LayerMask mask = LayerMask.GetMask(layers);
         RaycastHit2D raycastHit = Physics2D.Raycast(transform.position, direction, float.MaxValue, mask);

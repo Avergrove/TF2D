@@ -7,6 +7,10 @@ public abstract class Weapon : MonoBehaviour
     private GameObject owner;
     protected bool isEnabled;
 
+    protected float cooldownTimeStamp;
+    public float weaponCooldownTime;
+    public float weaponReloadTime;
+
     public GameObject Owner { get => owner; set => owner = value; }
 
     protected virtual void Start()
@@ -16,19 +20,25 @@ public abstract class Weapon : MonoBehaviour
 
     protected void Update()
     {
-        // Method Stub
+        if(cooldownTimeStamp != 0)
+        {
+            cooldownTimeStamp = Mathf.Clamp(cooldownTimeStamp - Time.deltaTime, 0, cooldownTimeStamp);
+        }
     }
 
     /// <summary>
     /// Sets a weapon to be enabled or disabled, affecting whether they can be used or not.
     /// </summary>
     /// <param name="enable"></param>
-    public void setEnabled(bool enable)
+    public void SetEnabled(bool enable)
     {
         isEnabled = enable;
     }
 
-    public abstract void OnFirePressed();
+    public virtual void OnFirePressed(Vector2 direction) {
+        cooldownTimeStamp = weaponCooldownTime;
+    }
+
     public abstract void OnFireHeld();
     public abstract void OnFireReleased();
 }
