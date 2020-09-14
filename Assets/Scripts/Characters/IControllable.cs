@@ -13,7 +13,7 @@ public interface IControllable
     void OnJoystickFirePressed(Vector2 joystickDirection);
     void OnFireHeld();
     void OnFireReleased();
-    void OnJumpPressed();
+    void OnJumpPressed(Vector2 tilt);
     void OnSlot1();
     void OnSlot2();
     void OnSlot3();

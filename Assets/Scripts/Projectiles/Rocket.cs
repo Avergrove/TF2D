@@ -25,8 +25,8 @@ public class Rocket : Projectile
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-
-        Collider2D[] affectedTargets = Physics2D.OverlapCircleAll(this.transform.position, explosionRadius);
+        int layerMask = (1 << LayerMask.NameToLayer("Platforms") | 1 << LayerMask.NameToLayer("Characters"));
+        Collider2D[] affectedTargets = Physics2D.OverlapCircleAll(this.transform.position, explosionRadius, layerMask);
         if (collision.gameObject.layer == LayerMask.NameToLayer("Platforms"))
         {
             Explode(affectedTargets, collision);

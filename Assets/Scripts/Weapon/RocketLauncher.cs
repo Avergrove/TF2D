@@ -22,7 +22,16 @@ public class RocketLauncher : ProjectileWeapon
 
         if (cooldownTimeStamp == 0)
         {
-            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            float angle;
+            if (!direction.Equals(Vector2.zero))
+            {
+                angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            }
+
+            else
+            {
+                angle = transform.parent.eulerAngles.z;
+            }
 
             GameObject generatedProjectile = GameObject.Instantiate(firedProjectile);
             generatedProjectile.GetComponent<Projectile>().shooter = Owner;

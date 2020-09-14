@@ -70,9 +70,9 @@ public class AvCharacterController : MonoBehaviour, IControllable
         character.PointWithJoystick(tilt);
     }
 
-    public void OnJumpPressed()
+    public void OnJumpPressed(Vector2 tilt)
     {
-        character.Jump();
+        character.Jump(tilt);
     }
 
     public void OnSlot1()

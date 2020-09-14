@@ -6,13 +6,13 @@ public class OffsetScrolling : MonoBehaviour
 {
     public float scrollSpeed;
 
-    private Renderer renderer;
+    private Renderer offsetRenderer;
 
     private Vector2 initialPosition;
 
     void Start()
     {
-        renderer = GetComponent<Renderer>();
+        offsetRenderer = GetComponent<Renderer>();
         initialPosition = this.transform.position;
     }
 
@@ -24,6 +24,6 @@ public class OffsetScrolling : MonoBehaviour
         float y = Mathf.Repeat(diff.y * scrollSpeed, 1);
 
         Vector2 offset = new Vector2(x, y);
-        renderer.sharedMaterial.SetTextureOffset("_MainTex", offset);
+        offsetRenderer.sharedMaterial.SetTextureOffset("_MainTex", offset);
     }
 }

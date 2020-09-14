@@ -6,10 +6,11 @@ using static Direction;
 /// <summary>
 /// Defines the stats of a character
 /// </summary>
-public abstract class Character : MonoBehaviour
+public class Character : MonoBehaviour
 {
     Rigidbody2D rgbd;
     GameObject weaponHolder;
+    AudioSource aSource;
 
     public int hp;
     public int currentHp;
@@ -21,12 +22,14 @@ public abstract class Character : MonoBehaviour
     private DirectionEnum facingDirection;
 
     public float acceleration;
+    public float airAcceleration;
+    public float airDeceleration;
     public float maxMovementSpeed;
 
     protected float maxAirControlSpeed;
     public float maxAirControlSpeedMultiplier;
 
-    protected float jumpHeight;
+    public float jumpHeight;
     public float jumpBoost;
     public float maxJumpCount;
 
@@ -36,12 +39,14 @@ public abstract class Character : MonoBehaviour
 
     private GameObject[] weapons;
 
+    public AudioClip jumpSound;
+
     public bool isGrounded;
 
     public virtual void Start()
     {
         this.rgbd = this.GetComponent<Rigidbody2D>();
-        this.rgbd.gravityScale = 5.5f;
+        this.aSource = this.GetComponent<AudioSource>();
 
         this.weaponHolder = this.transform.Find("WeaponHolder").gameObject;
 
@@ -50,7 +55,6 @@ public abstract class Character : MonoBehaviour
         this.facingDirection = DirectionEnum.Right;
 
         this.maxAirControlSpeed = 3f;
-        this.jumpHeight = 25;
 
         weapons = new GameObject[3];
 
@@ -93,15 +97,52 @@ public abstract class Character : MonoBehaviour
         // TODO: 2D Character strafing, maximum speed is saved until you land on the ground
         else
         {
-            // TODO: Fix case when you have higher velocity
-            if (Math.Abs(rgbd.velocity.x) < maxAirControlSpeed)
+            float multResult = tiltValue.x * rgbd.velocity.x;
+
+            // No x input, decay to 0 speed.
+            if (tiltValue.x == 0)
             {
-                // TODO: Decrease acceleration as character approaches max speed: Check Lerp
-                rgbd.velocity = new Vector2(rgbd.velocity.x + Direction.ConsiderDirection(facingDirection, acceleration) * Math.Abs(tiltValue.x), rgbd.velocity.y);
+                float result = Math.Abs(rgbd.velocity.x) - airDeceleration;
+                if (result > 0)
+                {
+                    if (rgbd.velocity.x > 0)
+                    {
+                        rgbd.velocity = new Vector2(rgbd.velocity.x - airDeceleration, rgbd.velocity.y);
+                    }
+
+                    else
+                    {
+                        rgbd.velocity = new Vector2(rgbd.velocity.x + airDeceleration, rgbd.velocity.y);
+                    }
+                }
+
+                else
+                {
+                    rgbd.velocity = new Vector2(0, rgbd.velocity.y);
+                }
+            }
+
+            // Same direction
+            else if (multResult >= 0)
+            {
+                if (Math.Abs(rgbd.velocity.x) < maxAirControlSpeed)
+                {
+                    rgbd.velocity = new Vector2(Math.Min(rgbd.velocity.x + Direction.ConsiderDirection(facingDirection, airAcceleration) * Math.Abs(tiltValue.x), maxMovementSpeed), rgbd.velocity.y);
+                }
+
+                else
+                {
+                    // We don't need to give more velocity if they are already exceeding the speed limits.
+                }
+            }
+
+            // Reverse direction
+            else if(multResult < 0)
+            {
+                rgbd.velocity = new Vector2(rgbd.velocity.x + Direction.ConsiderDirection(facingDirection, airAcceleration) * Math.Abs(tiltValue.x), rgbd.velocity.y);
             }
         }
     }
-
 
     public void PointWithMouse()
     {
@@ -128,7 +169,7 @@ public abstract class Character : MonoBehaviour
     private bool GroundCheck()
     {
         int layerMask = (1 << LayerMask.NameToLayer("Platforms"));
-        return Physics2D.OverlapArea(new Vector2(transform.position.x - 0.5f, transform.position.y - 0.5f), new Vector2(transform.position.x + 0.5f, transform.position.y - 1.5f), layerMask);
+        return Physics2D.OverlapArea(new Vector2(transform.position.x - 0.49f, transform.position.y - 0.5f), new Vector2(transform.position.x + 0.49f, transform.position.y - 1.5f), layerMask);
  
     }
 
@@ -198,14 +239,23 @@ public abstract class Character : MonoBehaviour
     }
 
     
-    public virtual void Jump()
+    public void Jump(Vector2 tiltValue)
     {
         // TODO: Boost only if analog stick is being pushed.
         if (isGrounded)
         {
-            float boost = Direction.ConsiderDirection(facingDirection, jumpBoost);
+            float boost = tiltValue.x != 0 ? Direction.ConsiderDirection(facingDirection, jumpBoost) : 0;
             rgbd.velocity = new Vector2(rgbd.velocity.x + boost, jumpHeight);
+            aSource.PlayOneShot(jumpSound);
         }
+    }
+
+    /// <summary>
+    /// 	A Bunny Hop occurs when tapping jump in a short frame of time during landing. A successful bunny hop will grant a small burst of speed.
+    /// </summary>
+    public virtual void BunnyHop()
+    {
+
     }
 
     public void OnSlot1()

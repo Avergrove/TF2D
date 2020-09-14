@@ -38,11 +38,6 @@ public class InputManager : MonoBehaviour
             CheckControllerButtons();
         }
 
-        if (Input.GetButtonDown("Jump"))
-        {
-            controllable.OnJumpPressed();
-        }
-
         // Fire handling
 
         else if (Input.GetButton("Fire1"))
@@ -92,39 +87,50 @@ public class InputManager : MonoBehaviour
         {
             inputMode = InputMode.Controller;
         }
+
     }
 
     void CheckKeyboardButtons()
     {
-        controllable.OnHorizontalAxis(Input.GetAxis("Horizontal"));
-        controllable.OnVerticalAxis(Input.GetAxis("Vertical"));
+
+        float moveXTilt = Input.GetAxis("Horizontal");
+        float moveYTilt = Input.GetAxis("Vertical");
+
+        controllable.OnHorizontalAxis(moveXTilt);
+        controllable.OnVerticalAxis(moveYTilt);
+
         controllable.OnMouseMoved();
 
         if (Input.GetButtonDown("Fire1"))
         {
             controllable.OnKeyboardFirePressed(Input.mousePosition);
         }
+
+        if (Input.GetButtonDown("Jump"))
+        {
+            controllable.OnJumpPressed(new Vector2(moveXTilt, moveYTilt));
+        }
     }
 
     void CheckControllerButtons()
     {
-        float xTilt = Input.GetAxis("LeftJoyHorizontal");
-        float yTilt = Input.GetAxis("LeftJoyVertical");
-        controllable.OnLeftAnalogStick(new Vector2(xTilt, yTilt));
+        float leftXTilt = Input.GetAxis("LeftJoyHorizontal");
+        float leftYTilt = Input.GetAxis("LeftJoyVertical");
+        controllable.OnLeftAnalogStick(new Vector2(leftXTilt, leftYTilt));
 
-        xTilt = Input.GetAxis("RightJoyHorizontal");
-        yTilt = Input.GetAxis("RightJoyVertical");
-        controllable.OnRightAnalogStick(new Vector2(xTilt, yTilt));
-
-        if (Input.GetAxis("Fire1") != 0)
-        {
-            // Calculate direction of fire.
-            controllable.OnJoystickFirePressed(new Vector2(xTilt, yTilt));
-        }
+        float rightXTilt = Input.GetAxis("RightJoyHorizontal");
+        float rightYTilt = Input.GetAxis("RightJoyVertical");
+        controllable.OnRightAnalogStick(new Vector2(rightXTilt, rightYTilt));
 
         if (Input.GetButtonDown("Jump"))
         {
-            controllable.OnJumpPressed();
+            controllable.OnJumpPressed(new Vector2(leftXTilt, leftYTilt));
+        }
+
+        if (Input.GetButton("Fire1"))
+        {
+            // Calculate direction of fire.
+            controllable.OnJoystickFirePressed(new Vector2(rightXTilt, rightYTilt));
         }
     }
 
