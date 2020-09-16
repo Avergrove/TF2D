@@ -15,7 +15,7 @@ public class SelfDestruct : MonoBehaviour
         AudioSource audioSource = this.GetComponent<AudioSource>();
         if(audioSource != null && onDestroyAudioClip != null)
         {
-            audioSource.PlayOneShot(onDestroyAudioClip);
+            audioSource.PlayOneShot(onDestroyAudioClip, 0.5f);
         }
     }
 

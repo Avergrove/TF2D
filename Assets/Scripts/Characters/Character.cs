@@ -40,6 +40,7 @@ public class Character : MonoBehaviour
     private GameObject[] weapons;
 
     public AudioClip jumpSound;
+    public GameObject jumpParticleObject;
 
     public bool isGrounded;
 
@@ -190,15 +191,16 @@ public class Character : MonoBehaviour
     /// <param name="slot">Which slot to add it to, starting from 0 for primary weapon.</param>
     public void GiveWeapon(GameObject weaponObject, int slot)
     {
+        if (weaponObject != null)
+        {
+            GameObject newObject = GameObject.Instantiate(weaponObject);
+            newObject.transform.SetParent(weaponHolder.transform);
+            newObject.transform.localPosition = shoulderDistance * new Vector2(1, 0);
+            newObject.GetComponent<Weapon>().Owner = this.gameObject;
+            newObject.GetComponent<SpriteRenderer>().enabled = false;
 
-        GameObject newObject = GameObject.Instantiate(weaponObject);
-        newObject.transform.SetParent(weaponHolder.transform);
-        newObject.transform.localPosition = shoulderDistance * new Vector2(1, 0);
-        newObject.GetComponent<Weapon>().Owner = this.gameObject;
-        newObject.GetComponent<SpriteRenderer>().enabled = false;
-
-        this.weapons[slot] = newObject;
-
+            this.weapons[slot] = newObject;
+        }
     }
 
     /// <summary>
@@ -246,7 +248,11 @@ public class Character : MonoBehaviour
         {
             float boost = tiltValue.x != 0 ? Direction.ConsiderDirection(facingDirection, jumpBoost) : 0;
             rgbd.velocity = new Vector2(rgbd.velocity.x + boost, jumpHeight);
-            aSource.PlayOneShot(jumpSound);
+            aSource.PlayOneShot(jumpSound, 0.1f);
+
+            // Create jump particle
+            GameObject createdJumpParticle = GameObject.Instantiate(jumpParticleObject);
+            createdJumpParticle.transform.position = this.transform.position;
         }
     }
 
