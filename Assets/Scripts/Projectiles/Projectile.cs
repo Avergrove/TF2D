@@ -5,6 +5,7 @@ using UnityEngine;
 /**
  * Base class that defines behavior of a projectile.
  */
+[RequireComponent(typeof(Rigidbody2D))]
 public abstract class Projectile : MonoBehaviour
 {
     public GameObject shooter;

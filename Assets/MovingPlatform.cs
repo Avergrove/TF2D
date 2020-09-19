@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MovingPlatform : MonoBehaviour
 {
-    private Rigidbody2D childRgbd;
+    private Rigidbody2D rgbd;
     public Vector2[] controlPoints;
     private int state;
     private float timeStamp;
@@ -14,7 +14,7 @@ public class MovingPlatform : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        childRgbd = this.GetComponent<Rigidbody2D>();
+        rgbd = this.GetComponent<Rigidbody2D>();
         this.transform.position = controlPoints[0];
         this.state = 0;
         this.timeStamp = 0;
@@ -32,7 +32,7 @@ public class MovingPlatform : MonoBehaviour
         }
 
         // Then determine at what position between the two control points we are at.
-        childRgbd.MovePosition(Vector2.Lerp(controlPoints[state], controlPoints[(state + 1) % controlPoints.Length], timeStamp / transitionTime));
+        rgbd.MovePosition(Vector2.Lerp(controlPoints[state], controlPoints[(state + 1) % controlPoints.Length], timeStamp / transitionTime));
     }
 
     // A platform parents a character if they land on one

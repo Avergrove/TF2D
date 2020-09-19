@@ -9,8 +9,11 @@ public class InputManager : MonoBehaviour
 {
 
     public GameObject controllingObject;
+    public GameObject optionsHandler;
+    
     private IControllable controllable;
     private InputMode inputMode;
+
 
     public enum InputMode
     {
@@ -37,35 +40,6 @@ public class InputManager : MonoBehaviour
         {
             CheckControllerButtons();
         }
-
-        // Fire handling
-
-        else if (Input.GetButton("Fire1"))
-        {
-            controllable.OnFireHeld();
-        }
-
-        else if (Input.GetButtonUp("Fire1"))
-        {
-            controllable.OnFireReleased();
-        }
-
-        // Weapon slots
-        if (Input.GetButtonDown("Slot1"))
-        {
-            controllable.OnSlot1();
-        }
-
-        if (Input.GetButtonDown("Slot2"))
-        {
-            controllable.OnSlot2();
-        }
-
-        if (Input.GetButtonDown("Slot3"))
-        {
-            controllable.OnSlot3();
-        }
-
     }
 
     void UpdateInputMode()
@@ -110,6 +84,11 @@ public class InputManager : MonoBehaviour
         {
             controllable.OnJumpPressed(new Vector2(moveXTilt, moveYTilt));
         }
+
+        if (Input.GetButtonDown("Pause"))
+        {
+            Application.Quit();
+        }
     }
 
     void CheckControllerButtons()
@@ -138,4 +117,6 @@ public class InputManager : MonoBehaviour
     {
         return inputMode;
     }
+
+
 }
