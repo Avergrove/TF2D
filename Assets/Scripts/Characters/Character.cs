@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEditor.UIElements;
 using UnityEngine;
 using static Direction;
 
@@ -21,7 +22,7 @@ public class Character : MonoBehaviour
 
     private DirectionEnum facingDirection;
 
-    public float acceleration;
+    public float accelerationForce;
     public float airAcceleration;
     public float airDeceleration;
     public float maxMovementSpeed;
@@ -43,6 +44,12 @@ public class Character : MonoBehaviour
     public GameObject jumpParticleObject;
 
     public bool isGrounded;
+    private bool firstGroundedFrame;
+    private GameObject groundedObject;
+    private Vector2 lastAttachedRgbdPosition;
+
+    public bool isAttachedToMovingPlatform;
+    Rigidbody2D attachedRgbd;
 
     public virtual void Start()
     {
@@ -64,10 +71,12 @@ public class Character : MonoBehaviour
         this.GiveWeapon(defaultMeleeWeapon, 2);
 
         this.EquipWeapon(0);
+
+        this.lastAttachedRgbdPosition = Vector2.positiveInfinity;
     }
 
     // Update is called once per frame
-    public virtual void Update()
+    public virtual void FixedUpdate()
     {
         isGrounded = GroundCheck();
     }
@@ -87,15 +96,35 @@ public class Character : MonoBehaviour
 
         if (isGrounded)
         {
-            if (Math.Abs(rgbd.velocity.x) < maxMovementSpeed)
+            Vector2 parentVelocity = Vector2.zero;
+            if (isAttachedToMovingPlatform)
             {
-                float resultingXVelocity = rgbd.velocity.x + Direction.ConsiderDirection(facingDirection, acceleration) * Math.Abs(tiltValue.x);
+                parentVelocity = attachedRgbd.velocity;
+            }
 
-                rgbd.velocity = new Vector2(Mathf.Clamp(resultingXVelocity, -maxMovementSpeed, maxMovementSpeed), rgbd.velocity.y);
+            float localMaxMov = maxMovementSpeed + parentVelocity.x;
+            float localMinMov = -maxMovementSpeed + parentVelocity.x;
+
+            if(tiltValue.x == 0)
+            {
+                // Do nothing, let x decay to 0 speed.
+            }
+
+            // If moving in same direction
+            else if (tiltValue.x * rgbd.velocity.x > 0)
+            {
+                if (localMinMov <= rgbd.velocity.x && rgbd.velocity.x <= localMaxMov)
+                {
+                    rgbd.AddForce(new Vector2(accelerationForce * tiltValue.x, 0));
+                }
+            }
+
+            else
+            {
+                rgbd.AddForce(new Vector2(accelerationForce * tiltValue.x, 0));
             }
         }
 
-        // TODO: 2D Character strafing, maximum speed is saved until you land on the ground
         else
         {
             float multResult = tiltValue.x * rgbd.velocity.x;
@@ -103,23 +132,16 @@ public class Character : MonoBehaviour
             // No x input, decay to 0 speed.
             if (tiltValue.x == 0)
             {
-                float result = Math.Abs(rgbd.velocity.x) - airDeceleration;
-                if (result > 0)
+                if (rgbd.velocity.x > 0)
                 {
-                    if (rgbd.velocity.x > 0)
-                    {
-                        rgbd.velocity = new Vector2(rgbd.velocity.x - airDeceleration, rgbd.velocity.y);
-                    }
-
-                    else
-                    {
-                        rgbd.velocity = new Vector2(rgbd.velocity.x + airDeceleration, rgbd.velocity.y);
-                    }
+                    rgbd.AddForce(new Vector2(-airDeceleration, 0));
+                    if (rgbd.velocity.x < 0) rgbd.velocity = new Vector2(0, rgbd.velocity.y);
                 }
 
-                else
+                else if(rgbd.velocity.x < 0)
                 {
-                    rgbd.velocity = new Vector2(0, rgbd.velocity.y);
+                    rgbd.AddForce(new Vector2(airDeceleration, 0));
+                    if (rgbd.velocity.x > 0) rgbd.velocity = new Vector2(0, rgbd.velocity.y);
                 }
             }
 
@@ -128,19 +150,15 @@ public class Character : MonoBehaviour
             {
                 if (Math.Abs(rgbd.velocity.x) < maxAirControlSpeed)
                 {
-                    rgbd.velocity = new Vector2(Math.Min(rgbd.velocity.x + Direction.ConsiderDirection(facingDirection, airAcceleration) * Math.Abs(tiltValue.x), maxMovementSpeed), rgbd.velocity.y);
-                }
-
-                else
-                {
-                    // We don't need to give more velocity if they are already exceeding the speed limits.
+                    rgbd.AddForce(new Vector2(Direction.ConsiderDirection(facingDirection, airAcceleration) * Math.Abs(tiltValue.x), 0));
+                    if (rgbd.velocity.x > maxAirControlSpeed) rgbd.velocity = new Vector2(maxAirControlSpeed, rgbd.velocity.y);
                 }
             }
 
             // Reverse direction
-            else if(multResult < 0)
+            else if (multResult < 0)
             {
-                rgbd.velocity = new Vector2(rgbd.velocity.x + Direction.ConsiderDirection(facingDirection, airAcceleration) * Math.Abs(tiltValue.x), rgbd.velocity.y);
+                rgbd.AddForce(new Vector2(Direction.ConsiderDirection(facingDirection, airAcceleration) * Math.Abs(tiltValue.x), 0));
             }
         }
     }
@@ -170,8 +188,9 @@ public class Character : MonoBehaviour
     private bool GroundCheck()
     {
         int layerMask = (1 << LayerMask.NameToLayer("Platforms"));
-        return Physics2D.OverlapArea(new Vector2(transform.position.x - 0.49f, transform.position.y - 0.5f), new Vector2(transform.position.x + 0.49f, transform.position.y - 1.5f), layerMask);
- 
+        Collider2D groundCollider = Physics2D.OverlapArea(new Vector2(transform.position.x - 0.49f, transform.position.y - 0.5f), new Vector2(transform.position.x + 0.49f, transform.position.y - 1.5f), layerMask);
+        return groundCollider;
+
     }
 
     public void OnVerticalAxis(float value)
@@ -240,7 +259,7 @@ public class Character : MonoBehaviour
         equippedWeapon.OnFireReleased();
     }
 
-    
+
     public void Jump(Vector2 tiltValue)
     {
         // TODO: Boost only if analog stick is being pushed.
@@ -253,6 +272,21 @@ public class Character : MonoBehaviour
             // Create jump particle
             GameObject createdJumpParticle = GameObject.Instantiate(jumpParticleObject);
             createdJumpParticle.transform.position = this.transform.position;
+        }
+    }
+
+    public void InformAttachmentToMovingPlatform(Rigidbody2D attachedRgbd, bool isAttached)
+    {
+        if (isAttached)
+        {
+            this.attachedRgbd = attachedRgbd;
+            isAttachedToMovingPlatform = true;
+        }
+
+        else
+        {
+            this.attachedRgbd = null;
+            isAttachedToMovingPlatform = false;
         }
     }
 
