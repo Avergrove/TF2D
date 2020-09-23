@@ -98,7 +98,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shooter: {fileID: 0}
   entityLifetime: 0
-  travelSpeed: 20
+  travelSpeed: 30
   gravityScale: 0
   contactDamage: 0
   knockback: 1250

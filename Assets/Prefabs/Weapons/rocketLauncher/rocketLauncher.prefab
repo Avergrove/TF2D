@@ -93,7 +93,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e2a6f3fd28231a41aff4befa1fb88ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  weaponCooldownTime: 0.4
+  weaponCooldownTime: 0.5
   weaponReloadTime: 0.8
   firedProjectile: {fileID: 5679998097279686186, guid: 84f9d657a768ec845aa21db60615a884,
     type: 3}

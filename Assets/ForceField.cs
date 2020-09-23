@@ -18,6 +18,7 @@ public class ForceField : MonoBehaviour
     {
         affRgbds = new List<Rigidbody2D>();
         radius = this.GetComponent<CircleCollider2D>().radius;
+        DrawEffectiveRadius();
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -54,6 +55,29 @@ public class ForceField : MonoBehaviour
         {
             affRgbds.Remove(collision.gameObject.GetComponent<Rigidbody2D>());
         }
+    }
+
+    private void DrawEffectiveRadius()
+    {
+        int segmentCount = 30;
+
+        LineRenderer lr = gameObject.GetComponent<LineRenderer>();
+        lr.positionCount = segmentCount;
+        lr.useWorldSpace = false;
+
+        float x, y;
+        float angle = 0;
+
+        for (int i = 0; i < (segmentCount); i++)
+        {
+            x = Mathf.Sin(Mathf.Deg2Rad * angle) * radius;
+            y = Mathf.Cos(Mathf.Deg2Rad * angle) * radius;
+
+            lr.SetPosition(i, new Vector3(x, y, 0));
+
+            angle += (360f / segmentCount);
+        }
+
     }
 
     private void OnDrawGizmos()
