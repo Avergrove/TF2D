@@ -24,7 +24,7 @@ public class InputManager : MonoBehaviour
     void Start()
     {
         UpdateInputMode();
-        controllable = controllingObject.GetComponent<AvCharacterController>();
+        controllable = controllingObject.GetComponent<PlayerController>();
     }
 
     // Update is called once per frame

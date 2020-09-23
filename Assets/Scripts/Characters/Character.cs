@@ -6,12 +6,14 @@ using static Direction;
 
 /// <summary>
 /// Defines the stats of a character
+/// TODO: Separate movement, this is supposed to be about stats, not movement!
 /// </summary>
 public class Character : MonoBehaviour
 {
     Rigidbody2D rgbd;
     GameObject weaponHolder;
     AudioSource aSource;
+    CharacterMovement characterMovement;
 
     public int hp;
     public int currentHp;
@@ -44,9 +46,6 @@ public class Character : MonoBehaviour
     public GameObject jumpParticleObject;
 
     public bool isGrounded;
-    private bool firstGroundedFrame;
-    private GameObject groundedObject;
-    private Vector2 lastAttachedRgbdPosition;
 
     public bool isAttachedToMovingPlatform;
     Rigidbody2D attachedRgbd;
@@ -55,6 +54,7 @@ public class Character : MonoBehaviour
     {
         this.rgbd = this.GetComponent<Rigidbody2D>();
         this.aSource = this.GetComponent<AudioSource>();
+        this.characterMovement = this.GetComponent<CharacterMovement>();
 
         this.weaponHolder = this.transform.Find("WeaponHolder").gameObject;
 
@@ -71,14 +71,25 @@ public class Character : MonoBehaviour
         this.GiveWeapon(defaultMeleeWeapon, 2);
 
         this.EquipWeapon(0);
-
-        this.lastAttachedRgbdPosition = Vector2.positiveInfinity;
     }
 
     // Update is called once per frame
-    public virtual void FixedUpdate()
+    public virtual void Update()
     {
         isGrounded = GroundCheck();
+    }
+
+    public void Jump(Vector2 tiltValue)
+    {
+        if (isGrounded)
+        {
+            characterMovement.Jump(tiltValue);
+            aSource.PlayOneShot(jumpSound);
+
+            // Create jump particle
+            GameObject createdJumpParticle = GameObject.Instantiate(jumpParticleObject);
+            createdJumpParticle.transform.position = this.transform.position;
+        }
     }
 
     public void Move(Vector2 tiltValue)
@@ -132,16 +143,15 @@ public class Character : MonoBehaviour
             // No x input, decay to 0 speed.
             if (tiltValue.x == 0)
             {
+                float prevX = rgbd.velocity.x;
                 if (rgbd.velocity.x > 0)
                 {
-                    rgbd.AddForce(new Vector2(-airDeceleration, 0));
-                    if (rgbd.velocity.x < 0) rgbd.velocity = new Vector2(0, rgbd.velocity.y);
+                    rgbd.velocity = new Vector2(Mathf.Clamp(rgbd.velocity.x - airDeceleration, 0, prevX), rgbd.velocity.y);
                 }
 
                 else if(rgbd.velocity.x < 0)
                 {
-                    rgbd.AddForce(new Vector2(airDeceleration, 0));
-                    if (rgbd.velocity.x > 0) rgbd.velocity = new Vector2(0, rgbd.velocity.y);
+                    rgbd.velocity = new Vector2(Mathf.Clamp(rgbd.velocity.x + airDeceleration, prevX, 0), rgbd.velocity.y);
                 }
             }
 
@@ -259,22 +269,6 @@ public class Character : MonoBehaviour
         equippedWeapon.OnFireReleased();
     }
 
-
-    public void Jump(Vector2 tiltValue)
-    {
-        // TODO: Boost only if analog stick is being pushed.
-        if (isGrounded)
-        {
-            float boost = tiltValue.x != 0 ? Direction.ConsiderDirection(facingDirection, jumpBoost) : 0;
-            rgbd.velocity = new Vector2(rgbd.velocity.x + boost, jumpHeight);
-            aSource.PlayOneShot(jumpSound, 0.1f);
-
-            // Create jump particle
-            GameObject createdJumpParticle = GameObject.Instantiate(jumpParticleObject);
-            createdJumpParticle.transform.position = this.transform.position;
-        }
-    }
-
     public void InformAttachmentToMovingPlatform(Rigidbody2D attachedRgbd, bool isAttached)
     {
         if (isAttached)
@@ -314,5 +308,10 @@ public class Character : MonoBehaviour
     {
         this.StowWeapon();
         this.EquipWeapon(2);
+    }
+
+    public void PlaySound()
+    {
+        aSource.PlayOneShot(jumpSound);
     }
 }

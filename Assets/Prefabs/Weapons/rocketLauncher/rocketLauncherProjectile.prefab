@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 5834806782588979333}
   - component: {fileID: 9185364548979499313}
   - component: {fileID: 5573520451789887508}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: rocketLauncherProjectile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
