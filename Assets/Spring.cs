@@ -17,10 +17,12 @@ public class Spring : MonoBehaviour
     [Tooltip("How powerful the spring will send the player towards the specified direction")]
     public float launchStrength;
 
+    private AudioSource audioSource;
+
     // Start is called before the first frame update
     void Start()
     {
-        
+        audioSource = GetComponent<AudioSource>();
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -29,6 +31,7 @@ public class Spring : MonoBehaviour
             Rigidbody2D playerRgbd = collision.GetComponent<Rigidbody2D>();
             playerRgbd.velocity = Vector2.zero;
             playerRgbd.AddForce(launchStrength * toDirectionVector(angle));
+            audioSource.Play();
         }
     }
 

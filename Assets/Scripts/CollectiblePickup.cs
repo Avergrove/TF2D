@@ -32,6 +32,7 @@ public class CollectiblePickup : MonoBehaviour
             // Play a pickup sound!
             audioSource.Play();
             onPickupCollectible.Invoke();
+            Destroy(gameObject, 0.5f);
         }
     }
 }

@@ -11,13 +11,14 @@ public class ForceField : MonoBehaviour
     public float strength;
     private float radius;
     private List<Rigidbody2D> affRgbds;
-
+    private AudioSource audioSource;
 
     // Start is called before the first frame update
     void Start()
     {
         affRgbds = new List<Rigidbody2D>();
         radius = this.GetComponent<CircleCollider2D>().radius;
+        audioSource = this.GetComponent<AudioSource>();
         DrawEffectiveRadius();
     }
 
@@ -26,6 +27,7 @@ public class ForceField : MonoBehaviour
         if (collision.gameObject.CompareTag("Players"))
         {
             affRgbds.Add(collision.gameObject.GetComponent<Rigidbody2D>());
+            audioSource.Play();
         }
     }
 
@@ -54,6 +56,7 @@ public class ForceField : MonoBehaviour
         if (collision.gameObject.CompareTag("Players"))
         {
             affRgbds.Remove(collision.gameObject.GetComponent<Rigidbody2D>());
+            audioSource.Stop();
         }
     }
 

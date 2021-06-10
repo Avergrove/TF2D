@@ -15,6 +15,8 @@ GameObject:
   - component: {fileID: 1948958361}
   - component: {fileID: 1948958355}
   - component: {fileID: 1948958356}
+  - component: {fileID: 2200160413223850659}
+  - component: {fileID: 6983720624483247923}
   m_Layer: 9
   m_Name: Soldier
   m_TagString: Players
@@ -75,15 +77,15 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: d20d18402e29ca0418e824a9555da61f, type: 3}
-  m_Color: {r: 0.7924528, g: 0.35510856, b: 0.35510856, a: 1}
+  m_Sprite: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!50 &8698379097914695212
@@ -102,7 +104,7 @@ Rigidbody2D:
   m_LinearDrag: 0
   m_AngularDrag: 0.05
   m_GravityScale: 10
-  m_Material: {fileID: 6200000, guid: 210e8337309a6a04b8e94e4132479ea5, type: 2}
+  m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 1
@@ -257,9 +259,9 @@ MonoBehaviour:
   currentHp: 175
   equippedWeapon: {fileID: 0}
   shoulderDistance: 2
-  accelerationForce: 0
-  airAcceleration: 15
-  airDeceleration: 2
+  accelerationForce: 100
+  airAcceleration: 300
+  airDeceleration: 50
   maxMovementSpeed: 10
   maxAirControlSpeedMultiplier: 10
   jumpHeight: 30
@@ -274,6 +276,42 @@ MonoBehaviour:
     type: 3}
   isGrounded: 0
   isAttachedToMovingPlatform: 0
+--- !u!114 &2200160413223850659
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8698379097914695213}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78960aa56ed64c94498d303656d745bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  jumpHeight: 30
+  bhopTimeWindow: 0.15
+  jumpBoost: {x: 50, y: 0}
+  jumpFXObject: {fileID: 1736094385175464760, guid: 7fa2995c3f7ccc247b6bdb70cf51c6fe,
+    type: 3}
+--- !u!95 &6983720624483247923
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8698379097914695213}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 4b342d67f53d1b2459e997720d3cd73a, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &8698379098572800518
 GameObject:
   m_ObjectHideFlags: 0
@@ -284,7 +322,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8698379098572800517}
   - component: {fileID: 8698379098572800516}
-  m_Layer: 9
+  m_Layer: 11
   m_Name: WeaponHolder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -343,7 +381,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 3ca9b08cf7680fb4e86250c6b84da9b5, type: 3}
+  m_Sprite: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -351,6 +389,6 @@ SpriteRenderer:
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0

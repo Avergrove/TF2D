@@ -8,11 +8,15 @@ public class CharacterMovement : MonoBehaviour
 {
     private Character character;
     private Rigidbody2D rgbd;
+    private Animator anim;
 
     public float jumpHeight;
     public float bhopTimeWindow;
     private float bhopTimeStamp;
     public Vector2 jumpBoost;
+
+    public GameObject jumpFXObject;
+
     private Vector2 landingVelocity;
     private bool firstLandingFrame;
 
@@ -20,6 +24,7 @@ public class CharacterMovement : MonoBehaviour
     {
         character = GetComponent<Character>();
         rgbd = GetComponent<Rigidbody2D>();
+        anim = GetComponent<Animator>();
 
         bhopTimeStamp = 0;
         landingVelocity = Vector2.zero;
@@ -28,6 +33,7 @@ public class CharacterMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
+
         if (character.isGrounded && firstLandingFrame)
         {
             landingVelocity = rgbd.velocity;
@@ -56,6 +62,8 @@ public class CharacterMovement : MonoBehaviour
         else
         {
             rgbd.velocity = new Vector2(rgbd.velocity.x, jumpHeight);
+            GameObject particleObject = GameObject.Instantiate(jumpFXObject);
+            particleObject.transform.position = this.transform.position;
         }
     }
 

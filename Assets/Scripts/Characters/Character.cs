@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using UnityEditor.UIElements;
 using UnityEngine;
 using static Direction;
 
@@ -14,6 +12,8 @@ public class Character : MonoBehaviour
     GameObject weaponHolder;
     AudioSource aSource;
     CharacterMovement characterMovement;
+    SpriteRenderer sr;
+    Animator anim;
 
     public int hp;
     public int currentHp;
@@ -55,6 +55,9 @@ public class Character : MonoBehaviour
         this.rgbd = this.GetComponent<Rigidbody2D>();
         this.aSource = this.GetComponent<AudioSource>();
         this.characterMovement = this.GetComponent<CharacterMovement>();
+        this.sr = this.GetComponent<SpriteRenderer>();
+        this.anim = this.GetComponent<Animator>();
+
 
         this.weaponHolder = this.transform.Find("WeaponHolder").gameObject;
 
@@ -77,6 +80,16 @@ public class Character : MonoBehaviour
     public virtual void Update()
     {
         isGrounded = GroundCheck();
+        anim.SetBool("isGrounded", isGrounded);
+        anim.SetFloat("speedX", Math.Abs(this.rgbd.velocity.x));
+        if (facingDirection.Equals(DirectionEnum.Right)){
+            sr.flipX = false;
+        }
+
+        else if(facingDirection.Equals(DirectionEnum.Left))
+        {
+            sr.flipX = true;
+        }
     }
 
     public void Jump(Vector2 tiltValue)
@@ -84,7 +97,7 @@ public class Character : MonoBehaviour
         if (isGrounded)
         {
             characterMovement.Jump(tiltValue);
-            aSource.PlayOneShot(jumpSound);
+            aSource.PlayOneShot(jumpSound, 0.15f);
 
             // Create jump particle
             GameObject createdJumpParticle = GameObject.Instantiate(jumpParticleObject);
