@@ -87,4 +87,14 @@ public class PlayerController : MonoBehaviour, IControllable
     {
         throw new System.NotImplementedException();
     }
+
+    public void OnClutchPressed()
+    {
+        character.OnClutchPressed();
+    }
+
+    public void OnClutchHeld()
+    {
+        throw new System.NotImplementedException();
+    }
 }

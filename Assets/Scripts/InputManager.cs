@@ -24,13 +24,14 @@ public class InputManager : MonoBehaviour
     void Start()
     {
         UpdateInputMode();
-        controllable = controllingObject.GetComponent<PlayerController>();
+        controllable = controllingObject.GetComponent<IControllable>();
     }
 
     // Update is called once per frame
     void Update()
     {
         UpdateInputMode();
+
         if (inputMode == InputMode.Keyboard)
         {
             CheckKeyboardButtons();
@@ -75,14 +76,20 @@ public class InputManager : MonoBehaviour
 
         controllable.OnMouseMoved();
 
-        if (Input.GetButtonDown("Fire1"))
+        if (Input.GetButtonDown("Jump"))
+        {
+            controllable.OnJumpPressed(new Vector2(moveXTilt, moveYTilt));
+        }
+
+        if (Input.GetButtonDown("Fire"))
         {
             controllable.OnKeyboardFirePressed(Input.mousePosition);
         }
 
-        if (Input.GetButtonDown("Jump"))
+
+        if (Input.GetButton("Clutch"))
         {
-            controllable.OnJumpPressed(new Vector2(moveXTilt, moveYTilt));
+            controllable.OnClutchPressed();
         }
 
         if (Input.GetButtonDown("Pause"))
@@ -106,10 +113,14 @@ public class InputManager : MonoBehaviour
             controllable.OnJumpPressed(new Vector2(leftXTilt, leftYTilt));
         }
 
-        if (Input.GetButton("Fire1"))
+        if (Input.GetButton("Fire"))
         {
-            // Calculate direction of fire.
             controllable.OnJoystickFirePressed(new Vector2(rightXTilt, rightYTilt));
+        }
+
+        if (Input.GetButton("Clutch"))
+        {
+            controllable.OnClutchPressed();
         }
     }
 

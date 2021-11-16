@@ -82,7 +82,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.8, y: 0.8}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 0
@@ -255,15 +255,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34d83002227bb4b499a229a8365a4559, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  rgbd: {fileID: 0}
   hp: 175
   currentHp: 175
   equippedWeapon: {fileID: 0}
   shoulderDistance: 2
-  accelerationForce: 100
-  airAcceleration: 300
-  airDeceleration: 50
-  maxMovementSpeed: 10
-  maxAirControlSpeedMultiplier: 10
+  facingDirection: 0
   jumpHeight: 30
   jumpBoost: 2.5
   maxJumpCount: 1
@@ -276,6 +273,7 @@ MonoBehaviour:
     type: 3}
   isGrounded: 0
   isAttachedToMovingPlatform: 0
+  isClutched: 0
 --- !u!114 &2200160413223850659
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -288,6 +286,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78960aa56ed64c94498d303656d745bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  accelerationForce: 100
+  airAcceleration: 300
+  airDeceleration: 50
+  maxMovementSpeed: 10
+  maxAirControlSpeedMultiplier: 10
   jumpHeight: 30
   bhopTimeWindow: 0.15
   jumpBoost: {x: 50, y: 0}

@@ -11,6 +11,8 @@ public interface IControllable
     void OnRightAnalogStick(Vector2 tilt);
     void OnKeyboardFirePressed(Vector2 mousePosition);
     void OnJoystickFirePressed(Vector2 joystickDirection);
+    void OnClutchPressed();
+    void OnClutchHeld();
     void OnFireHeld();
     void OnFireReleased();
     void OnJumpPressed(Vector2 tilt);

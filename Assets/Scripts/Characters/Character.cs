@@ -3,12 +3,12 @@ using UnityEngine;
 using static Direction;
 
 /// <summary>
-/// Defines the stats of a character
+/// Defines the stats and state of a character
 /// TODO: Separate movement, this is supposed to be about stats, not movement!
 /// </summary>
 public class Character : MonoBehaviour
 {
-    Rigidbody2D rgbd;
+    public Rigidbody2D rgbd;
     GameObject weaponHolder;
     AudioSource aSource;
     CharacterMovement characterMovement;
@@ -22,15 +22,7 @@ public class Character : MonoBehaviour
 
     public float shoulderDistance;
 
-    private DirectionEnum facingDirection;
-
-    public float accelerationForce;
-    public float airAcceleration;
-    public float airDeceleration;
-    public float maxMovementSpeed;
-
-    protected float maxAirControlSpeed;
-    public float maxAirControlSpeedMultiplier;
+    public DirectionEnum facingDirection;
 
     public float jumpHeight;
     public float jumpBoost;
@@ -45,10 +37,13 @@ public class Character : MonoBehaviour
     public AudioClip jumpSound;
     public GameObject jumpParticleObject;
 
+    // Movement State
     public bool isGrounded;
 
     public bool isAttachedToMovingPlatform;
     Rigidbody2D attachedRgbd;
+
+    public bool isClutched;
 
     public virtual void Start()
     {
@@ -65,8 +60,6 @@ public class Character : MonoBehaviour
 
         this.facingDirection = DirectionEnum.Right;
 
-        this.maxAirControlSpeed = 3f;
-
         weapons = new GameObject[3];
 
         this.GiveWeapon(defaultPrimaryWeapon, 0);
@@ -82,6 +75,8 @@ public class Character : MonoBehaviour
         isGrounded = GroundCheck();
         anim.SetBool("isGrounded", isGrounded);
         anim.SetFloat("speedX", Math.Abs(this.rgbd.velocity.x));
+        anim.SetFloat("velocityY", this.rgbd.velocity.y);
+        anim.SetFloat("speedY", Math.Abs(this.rgbd.velocity.y));
         if (facingDirection.Equals(DirectionEnum.Right)){
             sr.flipX = false;
         }
@@ -107,83 +102,7 @@ public class Character : MonoBehaviour
 
     public void Move(Vector2 tiltValue)
     {
-
-        if (tiltValue.x > 0)
-        {
-            facingDirection = DirectionEnum.Right;
-        }
-
-        else if (tiltValue.x < 0)
-        {
-            facingDirection = DirectionEnum.Left;
-        }
-
-        if (isGrounded)
-        {
-            Vector2 parentVelocity = Vector2.zero;
-            if (isAttachedToMovingPlatform)
-            {
-                parentVelocity = attachedRgbd.velocity;
-            }
-
-            float localMaxMov = maxMovementSpeed + parentVelocity.x;
-            float localMinMov = -maxMovementSpeed + parentVelocity.x;
-
-            if(tiltValue.x == 0)
-            {
-                // Do nothing, let x decay to 0 speed.
-            }
-
-            // If moving in same direction
-            else if (tiltValue.x * rgbd.velocity.x > 0)
-            {
-                if (localMinMov <= rgbd.velocity.x && rgbd.velocity.x <= localMaxMov)
-                {
-                    rgbd.AddForce(new Vector2(accelerationForce * tiltValue.x, 0));
-                }
-            }
-
-            else
-            {
-                rgbd.AddForce(new Vector2(accelerationForce * tiltValue.x, 0));
-            }
-        }
-
-        else
-        {
-            float multResult = tiltValue.x * rgbd.velocity.x;
-
-            // No x input, decay to 0 speed.
-            if (tiltValue.x == 0)
-            {
-                float prevX = rgbd.velocity.x;
-                if (rgbd.velocity.x > 0)
-                {
-                    rgbd.velocity = new Vector2(Mathf.Clamp(rgbd.velocity.x - airDeceleration, 0, prevX), rgbd.velocity.y);
-                }
-
-                else if(rgbd.velocity.x < 0)
-                {
-                    rgbd.velocity = new Vector2(Mathf.Clamp(rgbd.velocity.x + airDeceleration, prevX, 0), rgbd.velocity.y);
-                }
-            }
-
-            // Same direction
-            else if (multResult >= 0)
-            {
-                if (Math.Abs(rgbd.velocity.x) < maxAirControlSpeed)
-                {
-                    rgbd.AddForce(new Vector2(Direction.ConsiderDirection(facingDirection, airAcceleration) * Math.Abs(tiltValue.x), 0));
-                    if (rgbd.velocity.x > maxAirControlSpeed) rgbd.velocity = new Vector2(maxAirControlSpeed, rgbd.velocity.y);
-                }
-            }
-
-            // Reverse direction
-            else if (multResult < 0)
-            {
-                rgbd.AddForce(new Vector2(Direction.ConsiderDirection(facingDirection, airAcceleration) * Math.Abs(tiltValue.x), 0));
-            }
-        }
+        characterMovement.Move(tiltValue);
     }
 
     public void PointWithMouse()
@@ -297,12 +216,9 @@ public class Character : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 	A Bunny Hop occurs when tapping jump in a short frame of time during landing. A successful bunny hop will grant a small burst of speed.
-    /// </summary>
-    public virtual void BunnyHop()
+    public void OnClutchPressed()
     {
-
+        isClutched = !isClutched;
     }
 
     public void OnSlot1()
