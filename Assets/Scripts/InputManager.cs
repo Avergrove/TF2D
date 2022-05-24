@@ -87,9 +87,14 @@ public class InputManager : MonoBehaviour
         }
 
 
-        if (Input.GetButton("Clutch"))
+        if (Input.GetButtonDown("Clutch"))
         {
             controllable.OnClutchPressed();
+        }
+
+        if (Input.GetButtonUp("Clutch"))
+        {
+            controllable.OnClutchReleased();
         }
 
         if (Input.GetButtonDown("Pause"))

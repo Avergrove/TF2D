@@ -11,9 +11,13 @@ public class CharacterMovement : MonoBehaviour
     private Character character;
     private Rigidbody2D rgbd;
 
-    public float accelerationForce;
+    public float maxGroundSpeed;
+    public float groundAcceleration; // Described as a percentage of max speed, 0.05f for example will accelerate the character by 5% per frame.
+    public float groundSpeedDecay;   // Described a percentage, the character will lose 0.05% speed per frame, for example.
+    public float groundOverspeedDecay; // Describes the percentage speed lost when the button is held down in the same direction when over maximum speed.
+
     public float airAcceleration;
-    public float airDeceleration;
+    public float airSpeedDecay;
     public float maxMovementSpeed;
 
     protected float prevClutchedMaxSpeed;
@@ -22,8 +26,6 @@ public class CharacterMovement : MonoBehaviour
     public float maxAirControlSpeedMultiplier;
 
     public float jumpHeight;
-    public float bhopTimeWindow;
-    private float bhopTimeStamp;
     public Vector2 jumpBoost;
 
     public GameObject jumpFXObject;
@@ -36,7 +38,6 @@ public class CharacterMovement : MonoBehaviour
         character = GetComponent<Character>();
         rgbd = GetComponent<Rigidbody2D>();
 
-        bhopTimeStamp = 0;
         landingVelocity = Vector2.zero;
         firstLandingFrame = true;
     }
@@ -48,17 +49,15 @@ public class CharacterMovement : MonoBehaviour
         {
             landingVelocity = rgbd.velocity;
             firstLandingFrame = false;
-            bhopTimeStamp = bhopTimeWindow;
         }
 
         else if (!character.isGrounded)
         {
             firstLandingFrame = true;
-        }
-
-        if (bhopTimeStamp > 0)
-        {
-            bhopTimeStamp -= Time.deltaTime;
+            if(Math.Abs(rgbd.velocity.x) > Math.Abs(prevClutchedMaxSpeed))
+            {
+                prevClutchedMaxSpeed = Math.Abs(rgbd.velocity.x);
+            }
         }
     }
 
@@ -76,32 +75,56 @@ public class CharacterMovement : MonoBehaviour
 
         if (character.isGrounded)
         {
-            Vector2 parentVelocity = Vector2.zero;
-            if (character.isAttachedToMovingPlatform)
-            {
-                parentVelocity = rgbd.velocity;
-            }
-
-            float localMaxMov = maxMovementSpeed + parentVelocity.x;
-            float localMinMov = -maxMovementSpeed + parentVelocity.x;
-
-            if (tiltValue.x == 0)
-            {
-                // Do nothing, let x decay to 0 speed.
-            }
-
             // If moving in same direction
-            else if (tiltValue.x * rgbd.velocity.x > 0)
+            if (tiltValue.x * rgbd.velocity.x > 0)
             {
-                if (localMinMov <= rgbd.velocity.x && rgbd.velocity.x <= localMaxMov)
+                // If lower than max speed, then slowly accelerate up to it
+                if (Math.Abs(rgbd.velocity.x) < Math.Abs(maxGroundSpeed))
                 {
-                    rgbd.AddForce(new Vector2(accelerationForce * tiltValue.x, 0));
+                    rgbd.velocity = new Vector2(Mathf.Lerp(Math.Abs(rgbd.velocity.x), maxGroundSpeed, groundAcceleration) * Mathf.Sign(tiltValue.x), 0);
+                }
+
+                // If faster than max speed, then slow down the decay to max velocity
+                else if(Math.Abs(rgbd.velocity.x) > Math.Abs(maxGroundSpeed))
+                {
+                    rgbd.velocity = new Vector2(Mathf.Lerp(Math.Abs(rgbd.velocity.x), maxGroundSpeed, 100 - groundOverspeedDecay) * Mathf.Sign(tiltValue.x), 0);
+                }
+
+                // If equal to max speed, keep max speed.
+                else
+                {
+                    rgbd.velocity = new Vector2(maxGroundSpeed * Mathf.Sign(rgbd.velocity.x), rgbd.velocity.y);
                 }
             }
 
+            // If moving in different direction
+            else if(tiltValue.x * rgbd.velocity.x < 0)
+            {
+                rgbd.velocity = new Vector2(Mathf.Lerp(Math.Abs(rgbd.velocity.x), -maxGroundSpeed, groundAcceleration) * Mathf.Sign(rgbd.velocity.x), rgbd.velocity.y);
+            }
+
+            // If the player wishes to move from a standstill.
+            else if(tiltValue.x != 0)
+            {
+                rgbd.velocity = new Vector2(Mathf.Lerp(Math.Abs(rgbd.velocity.x), maxGroundSpeed, groundAcceleration) * Mathf.Sign(tiltValue.x), rgbd.velocity.y);
+            }
+
+            // Decay to 0 if there is no input
             else
             {
-                rgbd.AddForce(new Vector2(accelerationForce * tiltValue.x, 0));
+                // If decaying from right
+                if(rgbd.velocity.x > 0)
+                {
+                    rgbd.velocity = new Vector2(Mathf.Lerp(Math.Abs(rgbd.velocity.x), 0, groundSpeedDecay) * Mathf.Sign(rgbd.velocity.x), rgbd.velocity.y);
+                }
+
+                // If decaying from left
+                else
+                {
+                    rgbd.velocity = new Vector2(Mathf.Lerp(0, Math.Abs(rgbd.velocity.x), 100f - groundSpeedDecay) * Mathf.Sign(rgbd.velocity.x), rgbd.velocity.y);
+                }
+
+                // 0 case is not needed, already at standstill.
             }
         }
 
@@ -110,43 +133,38 @@ public class CharacterMovement : MonoBehaviour
         {
             float multResult = tiltValue.x * rgbd.velocity.x;
 
-            // A clutched character has strafe controls on, and will not lose speed even when not holding keys, mimicking the strafe behaviour in Source games
+            // Activating clutch will mimic the strafing behavior of source-based games
             if (character.isClutched)
             {
                 // Character continues moving in same direction
-                if(tiltValue.x == 0)
+                if (tiltValue.x == 0)
                 {
-                    // Continue accelerating to last reverse's max speed.
-
+                    // Nothing happens if no joystick input is given, character will move at same speed forward.
                 }
 
-                // Character moving in reverse direction will gradually turn in the other direction in the same max speed. Max speed is reset after landing.
-                else
+                // Characters moving in the same direction can move forward very slightly if at a low velocity.
+                else if(tiltValue.x * rgbd.velocity.x >= 0)
                 {
-                    
+                    rgbd.AddForce(Vector2.zero);
                 }
+
+                // Character moving in reverse direction can turn in the other direction up to max speed attained before landing.
+                else if(tiltValue.x * rgbd.velocity.x < 0)
+                {
+                    if (Math.Abs(rgbd.velocity.x) < Math.Abs(prevClutchedMaxSpeed))
+                    {
+                        rgbd.AddForce(Vector2.zero);
+                    }
+                }
+
 
             }
 
             // An unclutched character will behave like a regular platformer character, slowing down when no input is added, while backwards movement is slower.
             else
             {
-                if (tiltValue.x == 0)
-                {
-                    float prevX = rgbd.velocity.x;
-                    if (rgbd.velocity.x > 0)
-                    {
-                        rgbd.velocity = new Vector2(Mathf.Clamp(rgbd.velocity.x - airDeceleration, 0, prevX), rgbd.velocity.y);
-                    }
-
-                    else if (rgbd.velocity.x < 0)
-                    {
-                        rgbd.velocity = new Vector2(Mathf.Clamp(rgbd.velocity.x + airDeceleration, prevX, 0), rgbd.velocity.y);
-                    }
-                }
-
-                // Same direction
-                else if (multResult >= 0)
+                // When same direction of input, increase up to max air velocity.
+                if (multResult > 0)
                 {
                     if (Math.Abs(rgbd.velocity.x) < maxUnclutchedAirSpeed)
                     {
@@ -155,10 +173,16 @@ public class CharacterMovement : MonoBehaviour
                     }
                 }
 
-                // Reverse direction
+                // When different direction of input, increase up to opposite direction max velocity.
                 else if (multResult < 0)
                 {
                     rgbd.AddForce(new Vector2(Direction.ConsiderDirection(character.facingDirection, airAcceleration) * Math.Abs(tiltValue.x), 0));
+                }
+
+                // Decay to 0 speed if no input is given.
+                else
+                {
+                    rgbd.velocity = new Vector2(rgbd.velocity.x * airSpeedDecay, rgbd.velocity.y);
                 }
             }
         }
@@ -166,50 +190,15 @@ public class CharacterMovement : MonoBehaviour
 
     public void Jump(Vector2 tiltValue)
     {
-        if (bhopTimeStamp > 0 && tiltValue.x != 0)
-        {
-            BunnyHop(tiltValue);
-        }
-
-        else
-        {
             rgbd.velocity = new Vector2(rgbd.velocity.x, jumpHeight);
             GameObject particleObject = GameObject.Instantiate(jumpFXObject);
             particleObject.transform.position = this.transform.position;
-        }
-    }
-
-
-    private void BunnyHop(Vector2 tiltValue)
-    {
-        Vector2 boost = Vector2.zero;
-
-        if (tiltValue.x > 0)
-        {
-            boost = jumpBoost;
-        }
-
-        else if (tiltValue.x < 0)
-        {
-            boost = -jumpBoost;
-        }
-
-        if (landingVelocity.x * rgbd.velocity.x > 0 && Mathf.Abs(landingVelocity.x) > Mathf.Abs(rgbd.velocity.x))
-        {
-            rgbd.velocity = new Vector2(landingVelocity.x, jumpHeight);
-        }
-
-        else
-        {
-            rgbd.velocity = new Vector2(rgbd.velocity.x, jumpHeight);
-        }
-
-        rgbd.AddForce(boost);
-        bhopTimeStamp = 0;
     }
 
     private void OnDrawGizmos()
     {
         Gizmos.DrawLine(transform.position, (Vector2)transform.position - new Vector2(0, 1.5f));
     }
+
+    
 }

@@ -13,7 +13,6 @@ public class Character : MonoBehaviour
     AudioSource aSource;
     CharacterMovement characterMovement;
     SpriteRenderer sr;
-    Animator anim;
 
     public int hp;
     public int currentHp;
@@ -51,7 +50,6 @@ public class Character : MonoBehaviour
         this.aSource = this.GetComponent<AudioSource>();
         this.characterMovement = this.GetComponent<CharacterMovement>();
         this.sr = this.GetComponent<SpriteRenderer>();
-        this.anim = this.GetComponent<Animator>();
 
 
         this.weaponHolder = this.transform.Find("WeaponHolder").gameObject;
@@ -73,10 +71,12 @@ public class Character : MonoBehaviour
     public virtual void Update()
     {
         isGrounded = GroundCheck();
+        /*
         anim.SetBool("isGrounded", isGrounded);
         anim.SetFloat("speedX", Math.Abs(this.rgbd.velocity.x));
         anim.SetFloat("velocityY", this.rgbd.velocity.y);
         anim.SetFloat("speedY", Math.Abs(this.rgbd.velocity.y));
+        */
         if (facingDirection.Equals(DirectionEnum.Right)){
             sr.flipX = false;
         }
@@ -216,9 +216,14 @@ public class Character : MonoBehaviour
         }
     }
 
-    public void OnClutchPressed()
+    public void OnClutchDown()
     {
-        isClutched = !isClutched;
+        isClutched = true;
+    }
+
+    public void OnClutchReleased()
+    {
+        isClutched = false;
     }
 
     public void OnSlot1()

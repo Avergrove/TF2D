@@ -16,7 +16,6 @@ GameObject:
   - component: {fileID: 1948958355}
   - component: {fileID: 1948958356}
   - component: {fileID: 2200160413223850659}
-  - component: {fileID: 6983720624483247923}
   m_Layer: 9
   m_Name: Soldier
   m_TagString: Players
@@ -53,6 +52,8 @@ SpriteRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -296,25 +297,6 @@ MonoBehaviour:
   jumpBoost: {x: 50, y: 0}
   jumpFXObject: {fileID: 1736094385175464760, guid: 7fa2995c3f7ccc247b6bdb70cf51c6fe,
     type: 3}
---- !u!95 &6983720624483247923
-Animator:
-  serializedVersion: 3
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8698379097914695213}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 4b342d67f53d1b2459e997720d3cd73a, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &8698379098572800518
 GameObject:
   m_ObjectHideFlags: 0
@@ -360,6 +342,8 @@ SpriteRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:

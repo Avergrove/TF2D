@@ -24,4 +24,31 @@ public class Direction
 
         return input;
     }
+
+    /// <summary>
+    /// Converts the enumerable into an signed integer of 1 for easier calculation of direction
+    /// Right and up is 1, left and down is -1
+    /// </summary>
+    /// <param name="facingDirection"></param>
+    /// <returns></returns>
+    public static int ConvertToIdentityInteger(DirectionEnum facingDirection)
+    {
+        switch (facingDirection)
+        {
+            case DirectionEnum.Up:
+                return 1;
+
+            case DirectionEnum.Down:
+                return -1;
+
+            case DirectionEnum.Left:
+                return -1;
+
+            case DirectionEnum.Right:
+                return 1;
+
+            default:
+                throw new System.Exception("This will definitely not happen.");
+        }
+    }
 }

@@ -13,6 +13,7 @@ public interface IControllable
     void OnJoystickFirePressed(Vector2 joystickDirection);
     void OnClutchPressed();
     void OnClutchHeld();
+    void OnClutchReleased();
     void OnFireHeld();
     void OnFireReleased();
     void OnJumpPressed(Vector2 tilt);
